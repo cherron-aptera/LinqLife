@@ -5,16 +5,28 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Conway
 {
-    public struct Coordinate : IEquatable<Coordinate>
+    public class Coordinate : IEquatable<Coordinate>
     {
         public int x;
         public int y;
+
+        public Coordinate(int X, int Y)
+        {
+            x = X;
+            y = Y;
+        }
 
         public bool Equals([AllowNull] Coordinate other)
         {
             return x == other.x
                 && y == other.y;
         }
+
+        public IEnumerable<Coordinate> Neighbors =>
+            Enumerable.Range(x - 1, x + 1).Select(x_ =>     // Get X neighbors
+            Enumerable.Range(y - 1, y + 1).Select(y_ =>     // Get Y neighbors
+                new Coordinate(x_, y_))).SelectMany(s=>s)   // Flatten the arrays
+                .Where(c=>c.x != x || c.y != y);            // Exclude the center
     }
 
     public struct Cell : IEquatable<Cell>
@@ -51,11 +63,7 @@ namespace Conway
                             var cell = new Cell()
                             {
                                 value = true,
-                                coord = new Coordinate()
-                                {
-                                    x = x,
-                                    y = y
-                                },
+                                coord = new Coordinate(x, y)
                             };
                             worldData.Add(cell.coord,
                                 cell);
@@ -87,12 +95,13 @@ namespace Conway
             return cell;
         }
 
-        public bool Equals([AllowNull] World other)
-        {
+        public IEnumerable<Cell> GetNeighbors(Cell cell) =>
+            cell.coord.Neighbors.Select(c => GetCell(c));
+
+        public bool Equals([AllowNull] World other) => 
             // Ensure we have the same number of live cells,
             // And that for every live cell we have, it equals the value of a live cell in the other world.
-            return (liveCells.Count() == other.liveCells.Count())
+            (liveCells.Count() == other.liveCells.Count())
                 && liveCells.Select(cell => cell.value == other.GetCell(cell.coord).value).All(comparison => comparison == true);
-        }
     }
 }
