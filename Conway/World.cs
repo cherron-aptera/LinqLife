@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -6,13 +7,14 @@ namespace Conway
 {
     public struct Coordinate
     {
-        int x;
-        int y;
+        public int x;
+        public int y;
     }
 
     public struct Cell
     {
-        bool value;
+        public bool value;
+        public Coordinate coord;
     }
 
     public class World : IEquatable<World>
@@ -21,7 +23,31 @@ namespace Conway
 
         public World(string[] initData = null)
         {
-            // TODO: Populate worldData with initData
+            int x, y = 0;
+
+            foreach (string row in initData)
+            {
+                x = 0;
+                foreach (char cellChar in row)
+                {
+                    if(cellChar.Equals('#'))
+                    {
+                        var cell = new Cell()
+                        {
+                            value = true,
+                            coord = new Coordinate()
+                            {
+                                x = x,
+                                y = y
+                            },
+                        };
+                        worldData.Add(cell.coord,
+                            cell);
+                    }
+                    x++;
+                }
+                y++;
+            }
         }
 
         public World GetNext()
