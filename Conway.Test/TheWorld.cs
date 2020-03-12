@@ -154,17 +154,26 @@ namespace Conway.Test
 
         [Theory]
         [InlineData(
-            "Glider",
+            "Glider", // Smallest spaceship, moves diagonally
 
             ".#.\n" +
             "..#\n" +
             "###\n" +
             "...\n",
-            5,
-            1,
-            1
+            4,   // Takes 4 beats for 1 step
+            1, 1 // Each step is x+1 and y+1
             )]
-        public void Spaceships(string structureName, string worldData, int steps, int deltaX, int deltaY)
+        [InlineData(
+            "LWSS", // Light-weight spaceship, moves purely horizontally
+
+            ".#..#.\n" +
+            ".....#\n" +
+            ".#...#\n" +
+            "..####\n",
+            4,   // Takes 4 beats for 1 step
+            2, 0 // Each step is x+2 and y+0
+            )]
+        public void Spaceships(string structureName, string worldData, int beats, int deltaX, int deltaY)
         {
             World shipBase = new World(worldData);
 
@@ -174,7 +183,7 @@ namespace Conway.Test
 
             Console.WriteLine("\nSpaceship:");
 
-            for (int cnt = 1; cnt < steps; cnt++)
+            for (int cnt = 1; cnt <= beats; cnt++)
             {
                 ship = ship.GetNext();
                 Console.WriteLine($" {structureName} ({cnt + 1}): {ship.ToString()}");
