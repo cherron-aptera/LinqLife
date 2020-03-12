@@ -151,6 +151,5 @@ namespace Conway.Test
             Assert.Equal(blinkerB, blinker4);
             Assert.NotEqual(blinkerA, blinker4);
         }
-
     }
 }
