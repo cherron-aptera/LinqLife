@@ -97,10 +97,15 @@ namespace Conway
         {
             var live = liveCells.ToList();
 
-            var minX = live.Min(c => c.coord.x) - 1;
-            var maxX = live.Max(c => c.coord.x) + 1;
-            var minY = live.Min(c => c.coord.y) - 1;
-            var maxY = live.Max(c => c.coord.y) + 1;
+            int minX = 0, maxX = 0, minY = 0, maxY = 0;
+
+            if (live.Count > 0)
+            {
+                minX = live.Min(c => c.coord.x) - 1;
+                maxX = live.Max(c => c.coord.x) + 1;
+                minY = live.Min(c => c.coord.y) - 1;
+                maxY = live.Max(c => c.coord.y) + 1;
+            }
 
             var dX = maxX - minX;
             var dY = maxY - minY;

@@ -154,6 +154,45 @@ namespace Conway.Test
 
         [Theory]
         [InlineData(
+            "Penta-Decathlon", // 15-step oscilator (!)
+            15,   // Beats per cycle
+            "..###..\n" +
+            ".#...#.\n" +
+            ".#...#.\n" +
+            "..###..\n" +
+            ".......\n" +
+            ".......\n" +
+            ".......\n" +
+            ".......\n" +
+            "..###..\n" +
+            ".#...#.\n" +
+            ".#...#.\n" +
+            "..###..\n"
+            )]
+        public void VariableOscillator(string structureName, int period, string worldData)
+        {
+            World oscBase = new World(worldData);
+
+            Console.WriteLine($"{structureName} (1): {oscBase.ToString()}");
+
+            World osc = new World(oscBase);
+
+            Console.WriteLine($"\nOscillator (period {period}):");
+
+            for (int cnt = 1; cnt <= period; cnt++)
+            {
+                osc = osc.GetNext();
+                Console.WriteLine($" {structureName} ({cnt + 1}): {osc.ToString()}");
+
+                if (cnt < period)
+                    Assert.NotEqual(oscBase, osc);
+            }
+
+            Assert.Equal(oscBase, osc);
+        }
+
+        [Theory]
+        [InlineData(
             "Glider", // Smallest spaceship, moves diagonally
 
             ".#.\n" +
