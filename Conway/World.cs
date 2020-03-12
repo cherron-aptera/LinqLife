@@ -21,11 +21,14 @@ namespace Conway
                 x == other.x
              && y == other.y;
 
-        public override string ToString() => $"{x},{y}";
+        public override string ToString() =>
+            $"{x},{y}";
 
-        public override int GetHashCode() => x + y;
+        public override int GetHashCode() =>
+            x + y;
 
-        public Coordinate Plus(Coordinate other) => new Coordinate(x + other.x, y + other.y);
+        public Coordinate Plus(Coordinate other) =>
+            new Coordinate(x + other.x, y + other.y);
         #endregion
 
         public IEnumerable<Coordinate> NeighborsAndSelf =>
@@ -52,12 +55,11 @@ namespace Conway
         }
 
         public Cell(int X, int Y, bool Value) : this(new Coordinate(X, Y), Value)
-        {
-        }
+        { }
 
         public bool Equals([AllowNull] Cell other) =>
-            value == other.value
-                && coord.Equals(other.coord);
+               value == other.value
+            && coord.Equals(other.coord);
 
         public override int GetHashCode() =>
             coord.GetHashCode();
@@ -87,16 +89,14 @@ namespace Conway
         }
 
         public World(World copy) : this(copy.worldData.Values)
-        {
-        }
+        { }
 
         public World(string initData = "") : this(
             initData.Split('\n').Select((row, y) =>
                 row.Select((cellChar, x) =>
                     new Cell(x, y, cellChar.Equals('#')
-                        ))).SelectMany(s=>s))
-        {
-        }
+                        ))).SelectMany(s => s))
+        { }
         #endregion
 
 
@@ -124,10 +124,7 @@ namespace Conway
             worldData.Values.Where(c => c.value);
 
         public int GetLiveNeighborCount(Coordinate coord) =>
-            GetNeighbors(coord).Count(c => c.value == true);
-
-        public IEnumerable<Cell> GetNeighbors(Coordinate coord) =>
-            coord.Neighbors.Select(c => GetCell(c));
+            coord.Neighbors.Select(c => GetCell(c)).Count(c=>c.value);
 
         public IEnumerable<Cell> GetNeighborsAndSelf(Cell cell) =>
             cell.coord.NeighborsAndSelf.Select(c => GetCell(c));
