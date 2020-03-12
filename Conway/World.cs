@@ -33,6 +33,8 @@ namespace Conway
     {
         private Dictionary<Coordinate, Cell> worldData = new Dictionary<Coordinate, Cell>();
 
+        private IEnumerable<Cell> liveCells => worldData.Values.Where(c => c.value);
+
         public World(string[] initData = null)
         {
             int x, y = 0;
@@ -71,28 +73,26 @@ namespace Conway
             return new World();
         }
 
+        public Cell GetCell(Coordinate coord)
+        {
+            Cell cell;
+            if (!worldData.TryGetValue(coord, out cell))
+            {
+                return new Cell()
+                {
+                    coord = coord,
+                    value = false
+                };
+            }
+            return cell;
+        }
+
         public bool Equals([AllowNull] World other)
         {
-            // Look at all live cells
-            var hots = worldData.Values.Where(c => c.value);
-            var otherHots = other.worldData.Values.Where(c => c.value);
-
-            // Ensure that we have the same number of live cells
-            if (hots.Count() != otherHots.Count())
-                return false;
-
-            // Ensure that for each live cell, there is a corresponding live cell in the other list
-            foreach (Cell c in hots)
-            {
-                Cell oc;
-                if (!other.worldData.TryGetValue(c.coord, out oc))
-                    return false;
-
-                if (c.value != oc.value)
-                    return false;
-            }
-
-            return true;
+            // Ensure we have the same number of live cells,
+            // And that for every live cell we have, it equals the value of a live cell in the other world.
+            return (liveCells.Count() == other.liveCells.Count())
+                && liveCells.Select(cell => cell.value == other.GetCell(cell.coord).value).All(comparison => comparison == true);
         }
     }
 }
