@@ -173,6 +173,29 @@ namespace Conway.Test
             4,   // Takes 4 beats for 1 step
             2, 0 // Each step is x+2 and y+0
             )]
+        [InlineData(
+            "MWSS", // Medium-weight spaceship, moves purely horizontally
+
+            "...#...\n" +
+            ".#...#.\n" +
+            "......#\n" +
+            ".#....#\n" +
+            "..#####\n",
+            4,   // Takes 4 beats for 1 step
+            2, 0 // Each step is x+2 and y+0
+            )]
+        [InlineData(
+            "HWSS", // Heavy-weight spaceship, moves purely horizontally
+
+            "...##...\n" +
+            ".#....#.\n" +
+            ".......#\n" +
+            ".#.....#\n" +
+            "..######\n",
+            4,   // Takes 4 beats for 1 step
+            2, 0 // Each step is x+2 and y+0
+            )]
+
         public void Spaceships(string structureName, string worldData, int beats, int deltaX, int deltaY)
         {
             World shipBase = new World(worldData);
