@@ -134,21 +134,21 @@ namespace Conway.Test
 
             Console.WriteLine("\nOscillation (Period 2):");
 
-            Console.WriteLine($"{structureName} (1): {oscA.ToString()}");
+            Console.WriteLine($" {structureName} (1): {oscA.ToString()}");
 
             // Assert that A goes to B
             var osc2 = oscA.GetNext();
-            Console.WriteLine($"{structureName} (2): {osc2.ToString()}");
+            Console.WriteLine($" {structureName} (2): {osc2.ToString()}");
 
             Assert.Equal(oscB, osc2);
             Assert.NotEqual(oscA, osc2);
 
             // That B goes back to A
-            var osc3 = osc2.GetNext();            Console.WriteLine($"{structureName} (3): {osc3.ToString()}");
+            var osc3 = osc2.GetNext();            Console.WriteLine($" {structureName} (3): {osc3.ToString()}");
             Assert.Equal(oscA, osc3);            Assert.NotEqual(oscB, osc3);
 
             // And that A goes back to B again (for good measure)
-            var osc4 = osc3.GetNext();            Console.WriteLine($"{structureName} (4): {osc4.ToString()}");
+            var osc4 = osc3.GetNext();            Console.WriteLine($" {structureName} (4): {osc4.ToString()}");
             Assert.Equal(oscB, osc4);            Assert.NotEqual(oscA, osc4);
         }
 
@@ -253,7 +253,7 @@ namespace Conway.Test
 
             World shipShifted = shipBase.GetShifted(new Coordinate(deltaX, deltaY));
 
-            Console.WriteLine($"{structureName} (Original): {shipBase.ToString()}");
+            Console.WriteLine($" {structureName} (Original): {shipBase.ToString()}");
 
             // Ensure we have moved to the new location
             Assert.Equal(shipShifted, ship);
