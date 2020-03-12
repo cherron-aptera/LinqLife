@@ -25,21 +25,13 @@ namespace Conway
         public IEnumerable<Coordinate> Neighbors =>
             NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
 
-        public bool Equals([AllowNull] Coordinate other)
-        {
-            return x == other.x
-                && y == other.y;
-        }
+        public bool Equals([AllowNull] Coordinate other) =>
+                x == other.x
+             && y == other.y;
 
-        public override string ToString()
-        {
-            return $"{x},{y}";
-        }
+        public override string ToString() => $"{x},{y}";
 
-        public override int GetHashCode()
-        {
-            return x + y;
-        }
+        public override int GetHashCode() => x + y;
 
         public Coordinate Plus(Coordinate other) => new Coordinate(x + other.x, y + other.y);
     }
