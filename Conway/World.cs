@@ -45,7 +45,26 @@ namespace Conway
     {
         private Dictionary<Coordinate, Cell> worldData = new Dictionary<Coordinate, Cell>();
 
-        private IEnumerable<Cell> liveCells => worldData.Values.Where(c => c.value);
+        private IEnumerable<Cell> liveCells => worldData.Values.Where(c => c.value == true);
+
+        public override string ToString()
+        {
+            var minX = worldData.Values.Min(c => c.coord.x);
+            var maxX = worldData.Values.Max(c => c.coord.x);
+            var minY = worldData.Values.Min(c => c.coord.y);
+            var maxY = worldData.Values.Max(c => c.coord.y);
+
+            var dX = maxX - minX;
+            var dY = maxY - minY;
+
+            return $"Live Cells: {liveCells.Count()}\n" +
+                   $"({minX}, {minY}) - ({maxX}, {maxY})\n" +
+                String.Join("\n", Enumerable.Range(minY, dY+1).Select(y_ =>
+                String.Join(" ", Enumerable.Range(minX, dX+1).Select(x_ =>
+                    GetCell(new Coordinate(x_, y_))
+                        .value == true ? "#" : ".")
+                .ToArray())));
+        }
 
         public World(string[] initData = null)
         {
@@ -117,6 +136,6 @@ namespace Conway
             // Ensure we have the same number of live cells,
             // And that for every live cell we have, it equals the value of a live cell in the other world.
             (liveCells.Count() == other.liveCells.Count())
-                && liveCells.Select(cell => cell.value == other.GetCell(cell.coord).value).All(comparison => comparison == true);
+                && liveCells.Select(cell => cell.value == other.GetCell(cell.coord).value).All(v => v == true);
     }
 }

@@ -80,12 +80,12 @@ namespace Conway.Test
             var nextBeeHive = beeHive.GetNext();
 
             // Stable structures should remain
-            Assert.Equal(nextBlock, block);
-            Assert.Equal(nextBeeHive, beeHive);
+            Assert.Equal(block, nextBlock);
+            Assert.Equal(beeHive, nextBeeHive);
 
             // Arbitrary structures should not be equivalent
-            Assert.NotEqual(nextBlock, beeHive);
-            Assert.NotEqual(nextBeeHive, block);
+            Assert.NotEqual(beeHive, nextBlock);
+            Assert.NotEqual(block, nextBeeHive);
         }
 
     }
