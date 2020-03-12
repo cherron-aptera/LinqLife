@@ -75,20 +75,21 @@ namespace Conway
             new Cell(coord,
                     (neighborCount == 3)
                  || (neighborCount == 2 && value));
-
     }
 
     public class World : IEquatable<World>
     {
         private Dictionary<Coordinate, Cell> worldData = new Dictionary<Coordinate, Cell>();
+        public int Age { get; }
 
         #region Constructors
-        public World(IEnumerable<Cell> cells)
+        public World(IEnumerable<Cell> cells, int age = 0)
         {
             worldData = cells.ToDictionary(x => x.coord, x => x);
+            Age = age;
         }
 
-        public World(World copy) : this(copy.worldData.Values)
+        public World(World copy, int age = 0) : this(copy.worldData.Values, age)
         { }
 
         public World(string initData = "") : this(
@@ -102,39 +103,53 @@ namespace Conway
 
         #region World Generation
 
+        // Returns the next generation of a world
         public World GetNext() =>
-            new World(
-                // Look at all live cells and their neighbors
-                liveCells.Select(c => GetNeighborsAndSelf(c)).SelectMany(s => s).Distinct() // This is an enumerable of enumerables, so we must flatten the array
-                    .Select(focusedCell => focusedCell.GetNext(GetLiveNeighborCount(focusedCell.coord))));
+            new World( // Return a new world
+                LiveCells.Select( // that focuses on every live cell,
+                    c => NeighborsAndSelf(c)) // and each of its neighbors.
+                        .SelectMany(s => s).Distinct() // (Flatten enumerable of enumerables)
+                            .Select(focusedCell => // Then for each focused cell
+                                focusedCell.GetNext( // get the next generation of that cell
+                                    LiveNeighborCount(focusedCell.coord) // Based on that cell's current value and its live neighbor count
+                                    )),
+                Age+1);
 
+        // Returns the same world, but shifted by a coordinate delta
         public World GetShifted(Coordinate delta) =>
             new World(
-                liveCells.Select(c =>
-                    new Cell(c.coord.Plus(delta), c.value)));
+                LiveCells.Select(c =>
+                    new Cell(c.coord.Plus(delta), c.value)),
+                Age);
         #endregion
 
         #region Cell Utilities
 
-        public Cell GetCell(Coordinate coord) =>
+        public Cell CellAt(Coordinate coord) =>
             worldData.TryGetValue(coord, out Cell cell) ? cell :
                 new Cell(coord, false);
 
-        private IEnumerable<Cell> liveCells =>
+        public IEnumerable<Cell> NeighborsAndSelf(Cell cell) =>
+            cell.coord.NeighborsAndSelf.Select(c => CellAt(c));
+
+        public IEnumerable<Cell> LiveCells =>
             worldData.Values.Where(c => c.value);
 
-        public int GetLiveNeighborCount(Coordinate coord) =>
-            coord.Neighbors.Select(c => GetCell(c)).Count(c=>c.value);
-
-        public IEnumerable<Cell> GetNeighborsAndSelf(Cell cell) =>
-            cell.coord.NeighborsAndSelf.Select(c => GetCell(c));
+        public int LiveNeighborCount(Coordinate coord) =>
+            coord.Neighbors.Select(c => CellAt(c)).Count(c=>c.value);
 
         #endregion
 
         #region Interfaces
+        public bool Equals([AllowNull] World other) =>
+            // Ensure we have the same number of live cells,
+            (LiveCells.Count() == other.LiveCells.Count())
+                // And that for every live cell we have, it equals the value of a live cell in the other world.
+                && LiveCells.Select(cell => cell.value == other.CellAt(cell.coord).value).All(v => v == true);
+
         public override string ToString()
         {
-            var live = liveCells.ToList();
+            var live = LiveCells.ToList();
 
             int minX = 0, maxX = 0, minY = 0, maxY = 0;
 
@@ -146,24 +161,15 @@ namespace Conway
                 maxY = live.Max(c => c.coord.y) + 1;
             }
 
-            var dX = maxX - minX;
-            var dY = maxY - minY;
-
-            return $"Live Cells: {live.Count()}\n" +
+            return $"Age: {Age}\n" +
+                   $"Live Cells: {live.Count()}\n" +
                    $"({minX}, {minY}) - ({maxX}, {maxY})\n" +
-                    String.Join("\n", Enumerable.Range(minY, dY + 1).Select(y_ =>
-                    String.Join(" ", Enumerable.Range(minX, dX + 1).Select(x_ =>
-                       GetCell(new Coordinate(x_, y_))
+                    String.Join("\n", Enumerable.Range(minY, maxY - minY + 1).Select(y_ =>
+                    String.Join(" ", Enumerable.Range(minX, maxX - minX + 1).Select(x_ =>
+                       CellAt(new Coordinate(x_, y_))
                            .value == true ? "#" : ".")
                   .ToArray())));
         }
-
-        public bool Equals([AllowNull] World other) =>
-            // Ensure we have the same number of live cells,
-            (liveCells.Count() == other.liveCells.Count())
-                // And that for every live cell we have, it equals the value of a live cell in the other world.
-                && liveCells.Select(cell => cell.value == other.GetCell(cell.coord).value).All(v => v == true);
-
         #endregion
     }
 }
