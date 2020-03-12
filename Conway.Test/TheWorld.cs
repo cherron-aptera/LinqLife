@@ -49,9 +49,46 @@ namespace Conway.Test
 
             // Single nodes should die off
             Assert.Equal(world2, next);
+
+            // We should actually progress
+            Assert.NotEqual(world2, world1);
         }
 
+        /*
+        [Fact]
+        public void StillLife()
+        {
+            World block = new World(new string[]
+                {
+                    "....",
+                    ".##.",
+                    ".##.",
+                    "....",
+                }
+            );
 
+            World beeHive = new World(new string[]
+                {
+                    "......",
+                    "..##..",
+                    ".#..#.",
+                    "..##..",
+                    "......",
+                }
+            );
+
+            var nextBlock = block.GetNext();
+            var nextBeeHive = beeHive.GetNext();
+
+            // Stable structures should remain
+            Assert.Equal(nextBlock, block);
+            Assert.Equal(nextBeeHive, beeHive);
+
+            // Arbitrary structures should not be equivalent
+            Assert.NotEqual(nextBlock, beeHive);
+            Assert.NotEqual(nextBeeHive, block);
+        }
+        */
 
     }
 }
