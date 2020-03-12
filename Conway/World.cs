@@ -22,13 +22,13 @@ namespace Conway
                 && y == other.y;
         }
 
-        public IEnumerable<Coordinate> Neighbors =>
-            NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
-
         public IEnumerable<Coordinate> NeighborsAndSelf =>
             Enumerable.Range(x - 1, 3).Select(x_ =>        // Get X neighbors
             Enumerable.Range(y - 1, 3).Select(y_ =>        // Get Y neighbors
                 new Coordinate(x_, y_))).SelectMany(s => s);   // Flatten the arrays
+
+        public IEnumerable<Coordinate> Neighbors =>
+            NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
 
         public override string ToString()
         {
@@ -49,7 +49,7 @@ namespace Conway
 
         public override string ToString()
         {
-            return $"{(value ? '#' : '.')} ({coord.x}, {coord.y})";
+            return $"{(value ? '#' : '.')} ({coord})";
         }
     }
 
@@ -69,9 +69,7 @@ namespace Conway
             var dX = maxX - minX;
             var dY = maxY - minY;
 
-            var live = liveCells.ToList();
-
-            return $"Live Cells: {live.Count()}\n" +
+            return $"Live Cells: {liveCells.Count()}\n" +
                    $"({minX}, {minY}) - ({maxX}, {maxY})\n" +
                 String.Join("\n", Enumerable.Range(minY, dY+1).Select(y_ =>
                 String.Join(" ", Enumerable.Range(minX, dX+1).Select(x_ =>
@@ -136,30 +134,16 @@ namespace Conway
                         };
                     }));
 
-
-        public Cell GetCell(Coordinate coord)
-        {
-            Cell cell;
-            if (!worldData.TryGetValue(coord.ToString(), out cell))
-            {
-                return new Cell()
+        public Cell GetCell(Coordinate coord) =>
+            worldData.TryGetValue(coord.ToString(), out Cell cell) ? cell :
+                new Cell()
                 {
                     coord = coord,
                     value = false
                 };
-            }
-            return cell;
-        }
 
-        public int GetLiveNeighborCount(Coordinate coord)
-        {
-            var neighborCoords = coord.Neighbors.ToList();
-            Console.WriteLine(neighborCoords.Count());
-            var neighbors = GetNeighbors(coord).ToList();
-            return neighbors.Count(c => c.value == true);
-
-            //return GetNeighbors(coord).Count(c => c.value == true);
-        }
+        public int GetLiveNeighborCount(Coordinate coord) =>
+            GetNeighbors(coord).Count(c => c.value == true);
 
         public IEnumerable<Cell> GetNeighbors(Coordinate coord) =>
             coord.Neighbors.Select(c => GetCell(c));
@@ -169,8 +153,8 @@ namespace Conway
 
         public bool Equals([AllowNull] World other) => 
             // Ensure we have the same number of live cells,
-            // And that for every live cell we have, it equals the value of a live cell in the other world.
             (liveCells.Count() == other.liveCells.Count())
+                // And that for every live cell we have, it equals the value of a live cell in the other world.
                 && liveCells.Select(cell => cell.value == other.GetCell(cell.coord).value).All(v => v == true);
     }
 }

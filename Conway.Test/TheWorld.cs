@@ -115,5 +115,42 @@ namespace Conway.Test
             Assert.NotEqual(block, nextBeeHive);
         }
 
+        [Fact]
+        public void OscillatorsPeriod2()
+        {
+            World blinkerA = new World(new string[]
+                {
+                    "...",
+                    "###",
+                    "...",
+                }
+            );
+            World blinkerB = new World(new string[]
+                {
+                    ".#.",
+                    ".#.",
+                    ".#.",
+                }
+            );
+
+            // Assert that A goes to B
+            var blinker2 = blinkerA.GetNext();
+
+            Assert.Equal(blinkerB, blinker2);
+            Assert.NotEqual(blinkerA, blinker2);
+
+            // That B goes back to A
+            var blinker3 = blinker2.GetNext();
+
+            Assert.Equal(blinkerA, blinker3);
+            Assert.NotEqual(blinkerB, blinker3);
+
+            // And that A goes back to B again (for good measure)
+            var blinker4 = blinker3.GetNext();
+
+            Assert.Equal(blinkerB, blinker4);
+            Assert.NotEqual(blinkerA, blinker4);
+        }
+
     }
 }
