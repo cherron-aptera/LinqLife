@@ -54,7 +54,6 @@ namespace Conway.Test
             Assert.NotEqual(world2, world1);
         }
 
-        /*
         [Fact]
         public void StillLife()
         {
@@ -88,7 +87,6 @@ namespace Conway.Test
             Assert.NotEqual(nextBlock, beeHive);
             Assert.NotEqual(nextBeeHive, block);
         }
-        */
 
     }
 }
