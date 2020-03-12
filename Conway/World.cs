@@ -75,11 +75,26 @@ namespace Conway
             }
         }
 
-        public World GetNext()
+        public World(IEnumerable<Cell> cells)
         {
-            // TODO: Return something other than an empty world
-            return new World();
+            foreach (var c in cells)
+                worldData.Add(c.coord, c);
         }
+
+        public World GetNext() => new World(liveCells.Select(c => GetNeighbors(c)).SelectMany(s => s).Distinct()
+                .Select(a =>
+                {
+                    int neighborCount = GetNeighbors(a).Count(n => n.value == true);
+                    return new Cell()
+                    {
+                        coord = a.coord,
+                        // Any live cell with two or three neighbors survives.
+                        // Any dead cell with three live neighbors becomes a live cell.
+                        // All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+                        value = neighborCount == 3 || neighborCount == 2 && a.value
+                    };
+                }));
+
 
         public Cell GetCell(Coordinate coord)
         {
