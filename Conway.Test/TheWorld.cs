@@ -78,78 +78,86 @@ namespace Conway.Test
             Assert.NotEqual(world2, world1);
         }
 
-        [Fact]
-        public void StillLife()
+        [Theory]
+        [InlineData(
+            "Block",
+
+            "....\n" +
+            ".##.\n" +
+            ".##.\n" +
+            "....\n"
+            )]
+        [InlineData(
+            "Bee Hive",
+
+            "......\n" +
+            "..##..\n" +
+            ".#..#.\n" +
+            "..##..\n" +
+            "......\n"
+            )]
+        public void StillLife(string structureName, string worldData)
         {
-            World block = new World(new string[]
-                {
-                    "....",
-                    ".##.",
-                    ".##.",
-                    "....",
-                }
-            );
+            World stillLife = new World(worldData.Split('\n'));
 
-            World beeHive = new World(new string[]
-                {
-                    "......",
-                    "..##..",
-                    ".#..#.",
-                    "..##..",
-                    "......",
-                }
-            );
-
-            Assert.Equal(1, block.GetLiveNeighborCount(new Coordinate(0, 0)));
-            Assert.Equal(3, block.GetLiveNeighborCount(new Coordinate(1, 1)));
-
-            var nextBlock = block.GetNext();
-            var nextBeeHive = beeHive.GetNext();
+            var nextStillLife = stillLife.GetNext();
 
             // Stable structures should remain
-            Assert.Equal(block, nextBlock);
-            Assert.Equal(beeHive, nextBeeHive);
+            Assert.Equal(stillLife, nextStillLife);
 
-            // Arbitrary structures should not be equivalent
-            Assert.NotEqual(beeHive, nextBlock);
-            Assert.NotEqual(block, nextBeeHive);
+            Console.WriteLine("\nStill Life:");
+            Console.WriteLine($" {structureName} (1): {stillLife.ToString()}");
+            Console.WriteLine($" {structureName} (2): {nextStillLife.ToString()}");
         }
 
-        [Fact]
-        public void OscillatorsPeriod2()
+        [Theory]
+        [InlineData(
+            "Blinker",
+
+            "...\n" +
+            "###\n" +
+            "...\n",
+
+            ".#.\n" +
+            ".#.\n" +
+            ".#.\n"
+            )]
+        [InlineData(
+            "Toad",
+
+            "....\n" +
+            ".###\n" +
+            "###.\n" +
+            "....\n",
+
+            "..#.\n" +
+            "#..#\n" +
+            "#..#\n" +
+            ".#..\n"
+            )]
+        public void OscillatorsPeriod2(string structureName, string worldDataA, string worldDataB)
         {
-            World blinkerA = new World(new string[]
-                {
-                    "...",
-                    "###",
-                    "...",
-                }
-            );
-            World blinkerB = new World(new string[]
-                {
-                    ".#.",
-                    ".#.",
-                    ".#.",
-                }
-            );
+            World oscA = new World(worldDataA.Split('\n'));
+            World oscB = new World(worldDataB.Split('\n'));
+
+            Console.WriteLine("\nOscillation (Period 2):");
+
+            Console.WriteLine($"{structureName} (1): {oscA.ToString()}");
 
             // Assert that A goes to B
-            var blinker2 = blinkerA.GetNext();
+            var osc2 = oscA.GetNext();
+            Console.WriteLine($"{structureName} (2): {osc2.ToString()}");
 
-            Assert.Equal(blinkerB, blinker2);
-            Assert.NotEqual(blinkerA, blinker2);
+            Assert.Equal(oscB, osc2);
+            Assert.NotEqual(oscA, osc2);
 
             // That B goes back to A
-            var blinker3 = blinker2.GetNext();
-
-            Assert.Equal(blinkerA, blinker3);
-            Assert.NotEqual(blinkerB, blinker3);
+            var osc3 = osc2.GetNext();            Console.WriteLine($"{structureName} (3): {osc3.ToString()}");
+            Assert.Equal(oscA, osc3);            Assert.NotEqual(oscB, osc3);
 
             // And that A goes back to B again (for good measure)
-            var blinker4 = blinker3.GetNext();
-
-            Assert.Equal(blinkerB, blinker4);
-            Assert.NotEqual(blinkerA, blinker4);
+            var osc4 = osc3.GetNext();            Console.WriteLine($"{structureName} (4): {osc4.ToString()}");
+            Assert.Equal(oscB, osc4);            Assert.NotEqual(oscA, osc4);
         }
     }
 }

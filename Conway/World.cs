@@ -104,18 +104,20 @@ namespace Conway
 
         public override string ToString()
         {
-            var minX = worldData.Values.Min(c => c.coord.x) - 1;
-            var maxX = worldData.Values.Max(c => c.coord.x) + 1;
-            var minY = worldData.Values.Min(c => c.coord.y) - 1;
-            var maxY = worldData.Values.Max(c => c.coord.y) + 1;
+            var live = liveCells.ToList();
+
+            var minX = live.Min(c => c.coord.x) - 1;
+            var maxX = live.Max(c => c.coord.x) + 1;
+            var minY = live.Min(c => c.coord.y) - 1;
+            var maxY = live.Max(c => c.coord.y) + 1;
 
             var dX = maxX - minX;
             var dY = maxY - minY;
 
-            return $"Live Cells: {liveCells.Count()}\n" +
+            return $"Live Cells: {live.Count()}\n" +
                    $"({minX}, {minY}) - ({maxX}, {maxY})\n" +
-                String.Join("\n", Enumerable.Range(minY, dY + 1).Select(y_ =>
-                  String.Join(" ", Enumerable.Range(minX, dX + 1).Select(x_ =>
+                    String.Join("\n", Enumerable.Range(minY, dY + 1).Select(y_ =>
+                    String.Join(" ",  Enumerable.Range(minX, dX + 1).Select(x_ =>
                         GetCell(new Coordinate(x_, y_))
                             .value == true ? "#" : ".")
                   .ToArray())));
