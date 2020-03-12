@@ -159,5 +159,43 @@ namespace Conway.Test
             var osc4 = osc3.GetNext();            Console.WriteLine($"{structureName} (4): {osc4.ToString()}");
             Assert.Equal(oscB, osc4);            Assert.NotEqual(oscA, osc4);
         }
+
+        [Theory]
+        [InlineData(
+            "Glider",
+
+            ".#.\n" +
+            "..#\n" +
+            "###\n" +
+            "...\n",
+            4,
+            1,
+            1
+            )]
+        public void Spaceships(string structureName, string worldData, int steps, int deltaX, int deltaY)
+        {
+            World shipBase = new World(worldData.Split('\n'));
+
+            Console.WriteLine($"{structureName} (1): {shipBase.ToString()}");
+
+            World ship = new World(shipBase);
+
+            Console.WriteLine("\nSpaceship:");
+
+            for (int cnt = 1; cnt < steps; cnt++)
+            {
+                ship = ship.GetNext();
+                Console.WriteLine($"{structureName} ({cnt + 1}): {ship.ToString()}");
+            }
+
+            World shipShifted = shipBase.GetShifted(new Coordinate(deltaX, deltaY));
+
+            Console.WriteLine($"{structureName} (Original): {shipBase.ToString()}");
+
+            // Ensure we have moved to the new location
+            Assert.Equal(shipShifted, ship);
+            // Ensure we haven't stayed where we are
+            Assert.NotEqual(shipBase, ship);
+        }
     }
 }
