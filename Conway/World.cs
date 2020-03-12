@@ -40,12 +40,24 @@ namespace Conway
         {
             return x + y;
         }
+
+        public Coordinate Plus(Coordinate other) => new Coordinate(x + other.x, y + other.y);
     }
 
     public struct Cell : IEquatable<Cell>
     {
-        public bool value;
-        public Coordinate coord;
+        public bool value { get; }
+        public Coordinate coord { get; }
+
+        public Cell(Coordinate Coord, bool Value)
+        {
+            coord = Coord;
+            value = Value;
+        }
+
+        public Cell(int X, int Y, bool Value) : this(new Coordinate(X, Y), Value)
+        {
+        }
 
         public bool Equals([AllowNull] Cell other)
         {
@@ -63,37 +75,16 @@ namespace Conway
         private Dictionary<Coordinate, Cell> worldData = new Dictionary<Coordinate, Cell>();
 
         #region Boilerplate
-        public World(string[] initData = null)
+        public World(string initData = "") : this(
+            initData.Split('\n').Select((row, y) =>
+                row.Select((cellChar, x) =>
+                    new Cell(x, y, cellChar.Equals('#')
+                        ))).SelectMany(s=>s))
         {
-            int x, y = 0;
-
-            if (initData != null)
-            {
-                foreach (string row in initData)
-                {
-                    x = 0;
-                    foreach (char cellChar in row)
-                    {
-                        if (cellChar.Equals('#'))
-                        {
-                            var cell = new Cell()
-                            {
-                                value = true,
-                                coord = new Coordinate(x, y)
-                            };
-                            worldData.Add(cell.coord,
-                                cell);
-                        }
-                        x++;
-                    }
-                    y++;
-                }
-            }
         }
 
         public World(World copy) : this(copy.worldData.Values)
         {
-
         }
 
         public World(IEnumerable<Cell> cells)
@@ -128,28 +119,28 @@ namespace Conway
 
         public World GetNext() =>
             new World(
-                liveCells.Select(c => GetNeighborsAndSelf(c)).SelectMany(s => s).Distinct() // A flattened array of all distinct "interesting" nodes
-                    .Select(a =>
+                // Look at all live cells and their neighbors
+                liveCells.Select(c => GetNeighborsAndSelf(c)).SelectMany(s => s).Distinct() // This is an enumerable of enumerables, so we must flatten the array
+                    .Select(focusedCell =>
                     {
-                        // For each cell that has a live neighbor
-                        int neighborCount = GetLiveNeighborCount(a.coord);
-                        return new Cell()
-                        {
-                            coord = a.coord,
+                        var neighborCount = GetLiveNeighborCount(focusedCell.coord); // NOTE: Because we don't want to query this twice, cache the value here -- otherwise this whole section could be declarative
+                        return new Cell(
+                            focusedCell.coord,
                             // Any live cell with two or three neighbors survives.
                             // Any dead cell with three live neighbors becomes a live cell.
                             // All other live cells die in the next generation. Similarly, all other dead cells stay dead.
-                            value = (neighborCount == 3) || (neighborCount == 2 && a.value)
-                        };
+                            (neighborCount == 3) || (neighborCount == 2 && focusedCell.value)
+                        );
                     }));
+
+        public World GetShifted(Coordinate delta) =>
+            new World(
+                liveCells.Select(c =>
+                    new Cell(c.coord.Plus(delta), c.value)));
 
         public Cell GetCell(Coordinate coord) =>
             worldData.TryGetValue(coord, out Cell cell) ? cell :
-                new Cell()
-                {
-                    coord = coord,
-                    value = false
-                };
+                new Cell(coord, false);
 
         public int GetLiveNeighborCount(Coordinate coord) =>
             GetNeighbors(coord).Count(c => c.value == true);

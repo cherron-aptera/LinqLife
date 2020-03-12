@@ -9,14 +9,12 @@ namespace Conway.Test
         [Fact]
         public void WorldComparison()
         {
-            World world1 = new World(new string[]
-            {
+            World world1 = new World(
                 "#"
-            });
-            World world2 = new World(new string[]
-            {
+            );
+            World world2 = new World(
                 "."
-            });
+            );
 
             var world1_ = new World(world1);
             var world2_ = new World(world2);
@@ -33,12 +31,10 @@ namespace Conway.Test
         [Fact]
         public void EmptyWorldDoesNotHaveSpontaneousGeneration()
         {
-            World blankWorld = new World(new string[]
-                {
-                    "...",
-                    "...",
-                    "..."
-                }
+            World blankWorld = new World(
+                    "...\n" +
+                    "...\n" +
+                    "...\n"
             );
 
             var next = blankWorld.GetNext();
@@ -53,20 +49,16 @@ namespace Conway.Test
         [Fact]
         public void SingleCellDiesAlone()
         {
-            World world1 = new World(new string[]
-                {
-                    "...",
-                    ".#.",
-                    "..."
-                }
+            World world1 = new World(
+                    "...\n" +
+                    ".#.\n" +
+                    "...\n"
             );
 
-            World world2 = new World(new string[]
-                {
-                    "...",
-                    "...",
-                    "..."
-                }
+            World world2 = new World(
+                    "...\n" +
+                    "...\n" +
+                    "...\n"
             );
 
             var next = world1.GetNext();
@@ -98,7 +90,7 @@ namespace Conway.Test
             )]
         public void StillLife(string structureName, string worldData)
         {
-            World stillLife = new World(worldData.Split('\n'));
+            World stillLife = new World(worldData);
 
             var nextStillLife = stillLife.GetNext();
 
@@ -137,8 +129,8 @@ namespace Conway.Test
             )]
         public void OscillatorsPeriod2(string structureName, string worldDataA, string worldDataB)
         {
-            World oscA = new World(worldDataA.Split('\n'));
-            World oscB = new World(worldDataB.Split('\n'));
+            World oscA = new World(worldDataA);
+            World oscB = new World(worldDataB);
 
             Console.WriteLine("\nOscillation (Period 2):");
 
@@ -168,13 +160,13 @@ namespace Conway.Test
             "..#\n" +
             "###\n" +
             "...\n",
-            4,
+            5,
             1,
             1
             )]
         public void Spaceships(string structureName, string worldData, int steps, int deltaX, int deltaY)
         {
-            World shipBase = new World(worldData.Split('\n'));
+            World shipBase = new World(worldData);
 
             Console.WriteLine($"{structureName} (1): {shipBase.ToString()}");
 
@@ -185,7 +177,7 @@ namespace Conway.Test
             for (int cnt = 1; cnt < steps; cnt++)
             {
                 ship = ship.GetNext();
-                Console.WriteLine($"{structureName} ({cnt + 1}): {ship.ToString()}");
+                Console.WriteLine($" {structureName} ({cnt + 1}): {ship.ToString()}");
             }
 
             World shipShifted = shipBase.GetShifted(new Coordinate(deltaX, deltaY));
