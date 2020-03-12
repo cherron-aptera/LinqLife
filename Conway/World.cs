@@ -10,20 +10,12 @@ namespace Conway
         public int x { get; }
         public int y { get; }
 
+        #region Constructors and interfaces
         public Coordinate(int X, int Y) 
         {
             x = X;
             y = Y;
         }
-
-        public IEnumerable<Coordinate> NeighborsAndSelf =>
-            Enumerable.Range(x - 1, 3).Select(xNeighbor =>  // Iterate xNeighbor over x-1 to x+1
-            Enumerable.Range(y - 1, 3).Select(yNeighbor =>  // Iterate yNeighbor over y-1 to y+1
-                    new Coordinate(xNeighbor, yNeighbor)    // Create a coordinate for xNeighbor and yNeighbor
-                )).SelectMany(s => s);                      // Flatten the arrays
-
-        public IEnumerable<Coordinate> Neighbors =>
-            NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
 
         public bool Equals([AllowNull] Coordinate other) =>
                 x == other.x
@@ -34,6 +26,17 @@ namespace Conway
         public override int GetHashCode() => x + y;
 
         public Coordinate Plus(Coordinate other) => new Coordinate(x + other.x, y + other.y);
+        #endregion
+
+        public IEnumerable<Coordinate> NeighborsAndSelf =>
+            Enumerable.Range(x - 1, 3).Select(xNeighbor =>  // Iterate xNeighbor over x-1 to x+1
+            Enumerable.Range(y - 1, 3).Select(yNeighbor =>  // Iterate yNeighbor over y-1 to y+1
+                    new Coordinate(xNeighbor, yNeighbor)    // Create a coordinate for xNeighbor and yNeighbor
+                )).SelectMany(s => s);                      // Flatten the arrays
+
+        public IEnumerable<Coordinate> Neighbors =>
+            NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
+
     }
 
     public struct Cell : IEquatable<Cell>
@@ -41,6 +44,7 @@ namespace Conway
         public bool value { get; }
         public Coordinate coord { get; }
 
+        #region Constructors and interfaces
         public Cell(Coordinate Coord, bool Value)
         {
             coord = Coord;
@@ -55,16 +59,28 @@ namespace Conway
             value == other.value
                 && coord.Equals(other.coord);
 
+        public override int GetHashCode() =>
+            coord.GetHashCode();
+
         public override string ToString() =>
              $"{(value ? '#' : '.')} ({coord})";
-        
+        #endregion
+
+        public Cell GetNext(int neighborCount) =>
+            // Any live cell with two or three neighbors survives.
+            // Any dead cell with three live neighbors becomes a live cell.
+            // All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+            new Cell(coord,
+                    (neighborCount == 3)
+                 || (neighborCount == 2 && value));
+
     }
 
     public class World : IEquatable<World>
     {
         private Dictionary<Coordinate, Cell> worldData = new Dictionary<Coordinate, Cell>();
 
-        #region Boilerplate
+        #region Constructors
         public World(IEnumerable<Cell> cells)
         {
             worldData = cells.ToDictionary(x => x.coord, x => x);
@@ -90,13 +106,7 @@ namespace Conway
             new World(
                 // Look at all live cells and their neighbors
                 liveCells.Select(c => GetNeighborsAndSelf(c)).SelectMany(s => s).Distinct() // This is an enumerable of enumerables, so we must flatten the array
-                    .Select(focusedCell => new Cell(
-                            focusedCell.coord,
-                            // Any live cell with two or three neighbors survives.
-                            // Any dead cell with three live neighbors becomes a live cell.
-                            // All other live cells die in the next generation. Similarly, all other dead cells stay dead.
-                            (GetLiveNeighborCount(focusedCell.coord, out int neighborCount) == 3) || (neighborCount == 2 && focusedCell.value)
-                        )));
+                    .Select(focusedCell => focusedCell.GetNext(GetLiveNeighborCount(focusedCell.coord))));
 
         public World GetShifted(Coordinate delta) =>
             new World(
@@ -105,20 +115,23 @@ namespace Conway
         #endregion
 
         #region Cell Utilities
-        private IEnumerable<Cell> liveCells => worldData.Values.Where(c => c.value);
 
         public Cell GetCell(Coordinate coord) =>
             worldData.TryGetValue(coord, out Cell cell) ? cell :
                 new Cell(coord, false);
 
-        public int GetLiveNeighborCount(Coordinate coord, out int count) =>
-            count = GetNeighbors(coord).Count(c => c.value == true);
+        private IEnumerable<Cell> liveCells =>
+            worldData.Values.Where(c => c.value);
+
+        public int GetLiveNeighborCount(Coordinate coord) =>
+            GetNeighbors(coord).Count(c => c.value == true);
 
         public IEnumerable<Cell> GetNeighbors(Coordinate coord) =>
             coord.Neighbors.Select(c => GetCell(c));
 
         public IEnumerable<Cell> GetNeighborsAndSelf(Cell cell) =>
             cell.coord.NeighborsAndSelf.Select(c => GetCell(c));
+
         #endregion
 
         #region Interfaces
