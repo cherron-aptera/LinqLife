@@ -115,7 +115,7 @@ namespace Conway
                     .Select(a =>
                     {
                         // For each cell that has a live neighbor
-                        int neighborCount = GetNeighbors(a).Count(n => n.value == true);
+                        int neighborCount = GetLiveNeighborCount(a.coord);
                         return new Cell()
                         {
                             coord = a.coord,
@@ -141,8 +141,13 @@ namespace Conway
             return cell;
         }
 
-        public IEnumerable<Cell> GetNeighbors(Cell cell) =>
-            cell.coord.Neighbors.Select(c => GetCell(c));
+        public int GetLiveNeighborCount(Coordinate coord)
+        {
+            return GetNeighbors(coord).Count(c => c.value == true);
+        }
+
+        public IEnumerable<Cell> GetNeighbors(Coordinate coord) =>
+            coord.Neighbors.Select(c => GetCell(c));
 
         public IEnumerable<Cell> GetNeighborsAndSelf(Cell cell) =>
             cell.coord.NeighborsAndSelf.Select(c => GetCell(c));

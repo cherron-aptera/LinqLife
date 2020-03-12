@@ -97,11 +97,11 @@ namespace Conway.Test
                 }
             );
 
+            Assert.Equal(1, block.GetLiveNeighborCount(new Coordinate(0, 0)));
+            Assert.Equal(3, block.GetLiveNeighborCount(new Coordinate(1, 1)));
+
             var nextBlock = block.GetNext();
             var nextBeeHive = beeHive.GetNext();
-
-            Console.WriteLine(block);
-            Console.WriteLine(nextBlock);
 
             // Stable structures should remain
             Assert.Equal(block, nextBlock);
