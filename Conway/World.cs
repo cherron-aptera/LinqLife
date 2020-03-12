@@ -26,9 +26,14 @@ namespace Conway
             NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
 
         public IEnumerable<Coordinate> NeighborsAndSelf =>
-            Enumerable.Range(x - 1, x + 1).Select(x_ =>        // Get X neighbors
-            Enumerable.Range(y - 1, y + 1).Select(y_ =>        // Get Y neighbors
+            Enumerable.Range(x - 1, 3).Select(x_ =>        // Get X neighbors
+            Enumerable.Range(y - 1, 3).Select(y_ =>        // Get Y neighbors
                 new Coordinate(x_, y_))).SelectMany(s => s);   // Flatten the arrays
+
+        public override string ToString()
+        {
+            return $"{x},{y}";
+        }
     }
 
     public struct Cell : IEquatable<Cell>
@@ -41,11 +46,16 @@ namespace Conway
             return value == other.value
                 && coord.Equals(other.coord);
         }
+
+        public override string ToString()
+        {
+            return $"{(value ? '#' : '.')} ({coord.x}, {coord.y})";
+        }
     }
 
     public class World : IEquatable<World>
     {
-        private Dictionary<Coordinate, Cell> worldData = new Dictionary<Coordinate, Cell>();
+        private Dictionary<string, Cell> worldData = new Dictionary<string, Cell>();
 
         private IEnumerable<Cell> liveCells => worldData.Values.Where(c => c.value == true);
 
@@ -88,7 +98,7 @@ namespace Conway
                                 value = true,
                                 coord = new Coordinate(x, y)
                             };
-                            worldData.Add(cell.coord,
+                            worldData.Add(cell.coord.ToString(),
                                 cell);
                         }
                         x++;
@@ -106,7 +116,7 @@ namespace Conway
         public World(IEnumerable<Cell> cells)
         {
             foreach (var c in cells)
-                worldData.Add(c.coord, c);
+                worldData.Add(c.coord.ToString(), c);
         }
 
         public World GetNext() =>
@@ -130,7 +140,7 @@ namespace Conway
         public Cell GetCell(Coordinate coord)
         {
             Cell cell;
-            if (!worldData.TryGetValue(coord, out cell))
+            if (!worldData.TryGetValue(coord.ToString(), out cell))
             {
                 return new Cell()
                 {
@@ -143,7 +153,12 @@ namespace Conway
 
         public int GetLiveNeighborCount(Coordinate coord)
         {
-            return GetNeighbors(coord).Count(c => c.value == true);
+            var neighborCoords = coord.Neighbors.ToList();
+            Console.WriteLine(neighborCoords.Count());
+            var neighbors = GetNeighbors(coord).ToList();
+            return neighbors.Count(c => c.value == true);
+
+            //return GetNeighbors(coord).Count(c => c.value == true);
         }
 
         public IEnumerable<Cell> GetNeighbors(Coordinate coord) =>

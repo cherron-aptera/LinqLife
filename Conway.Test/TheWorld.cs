@@ -25,6 +25,9 @@ namespace Conway.Test
             Assert.Equal(world2, world2_);
             Assert.NotEqual(world1, world2_);
             Assert.NotEqual(world2, world1_);
+
+            Assert.True(world1.GetCell(new Coordinate(0, 0)).value);
+            Assert.False(world2.GetCell(new Coordinate(0, 0)).value);
         }
 
         [Fact]
