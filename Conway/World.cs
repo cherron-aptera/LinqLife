@@ -23,10 +23,12 @@ namespace Conway
         }
 
         public IEnumerable<Coordinate> Neighbors =>
-            Enumerable.Range(x - 1, x + 1).Select(x_ =>     // Get X neighbors
-            Enumerable.Range(y - 1, y + 1).Select(y_ =>     // Get Y neighbors
-                new Coordinate(x_, y_))).SelectMany(s=>s)   // Flatten the arrays
-                .Where(c=>c.x != x || c.y != y);            // Exclude the center
+            NeighborsAndSelf.Where(c=>c.x != x || c.y != y);   // Exclude the center
+
+        public IEnumerable<Coordinate> NeighborsAndSelf =>
+            Enumerable.Range(x - 1, x + 1).Select(x_ =>        // Get X neighbors
+            Enumerable.Range(y - 1, y + 1).Select(y_ =>        // Get Y neighbors
+                new Coordinate(x_, y_))).SelectMany(s => s);   // Flatten the arrays
     }
 
     public struct Cell : IEquatable<Cell>
@@ -49,15 +51,17 @@ namespace Conway
 
         public override string ToString()
         {
-            var minX = worldData.Values.Min(c => c.coord.x);
-            var maxX = worldData.Values.Max(c => c.coord.x);
-            var minY = worldData.Values.Min(c => c.coord.y);
-            var maxY = worldData.Values.Max(c => c.coord.y);
+            var minX = worldData.Values.Min(c => c.coord.x) - 1;
+            var maxX = worldData.Values.Max(c => c.coord.x) + 1;
+            var minY = worldData.Values.Min(c => c.coord.y) - 1;
+            var maxY = worldData.Values.Max(c => c.coord.y) + 1;
 
             var dX = maxX - minX;
             var dY = maxY - minY;
 
-            return $"Live Cells: {liveCells.Count()}\n" +
+            var live = liveCells.ToList();
+
+            return $"Live Cells: {live.Count()}\n" +
                    $"({minX}, {minY}) - ({maxX}, {maxY})\n" +
                 String.Join("\n", Enumerable.Range(minY, dY+1).Select(y_ =>
                 String.Join(" ", Enumerable.Range(minX, dX+1).Select(x_ =>
@@ -94,25 +98,33 @@ namespace Conway
             }
         }
 
+        public World(World copy) : this(copy.worldData.Values)
+        {
+
+        }
+
         public World(IEnumerable<Cell> cells)
         {
             foreach (var c in cells)
                 worldData.Add(c.coord, c);
         }
 
-        public World GetNext() => new World(liveCells.Select(c => GetNeighbors(c)).SelectMany(s => s).Distinct()
-                .Select(a =>
-                {
-                    int neighborCount = GetNeighbors(a).Count(n => n.value == true);
-                    return new Cell()
+        public World GetNext() =>
+            new World(
+                liveCells.Select(c => GetNeighborsAndSelf(c)).SelectMany(s => s).Distinct() // A flattened array of all distinct "interesting" nodes
+                    .Select(a =>
                     {
-                        coord = a.coord,
-                        // Any live cell with two or three neighbors survives.
-                        // Any dead cell with three live neighbors becomes a live cell.
-                        // All other live cells die in the next generation. Similarly, all other dead cells stay dead.
-                        value = neighborCount == 3 || neighborCount == 2 && a.value
-                    };
-                }));
+                        // For each cell that has a live neighbor
+                        int neighborCount = GetNeighbors(a).Count(n => n.value == true);
+                        return new Cell()
+                        {
+                            coord = a.coord,
+                            // Any live cell with two or three neighbors survives.
+                            // Any dead cell with three live neighbors becomes a live cell.
+                            // All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+                            value = (neighborCount == 3) || (neighborCount == 2 && a.value)
+                        };
+                    }));
 
 
         public Cell GetCell(Coordinate coord)
@@ -131,6 +143,9 @@ namespace Conway
 
         public IEnumerable<Cell> GetNeighbors(Cell cell) =>
             cell.coord.Neighbors.Select(c => GetCell(c));
+
+        public IEnumerable<Cell> GetNeighborsAndSelf(Cell cell) =>
+            cell.coord.NeighborsAndSelf.Select(c => GetCell(c));
 
         public bool Equals([AllowNull] World other) => 
             // Ensure we have the same number of live cells,

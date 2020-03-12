@@ -7,6 +7,27 @@ namespace Conway.Test
     public class TheWorld
     {
         [Fact]
+        public void WorldComparison()
+        {
+            World world1 = new World(new string[]
+            {
+                "#"
+            });
+            World world2 = new World(new string[]
+            {
+                "."
+            });
+
+            var world1_ = new World(world1);
+            var world2_ = new World(world2);
+
+            Assert.Equal(world1, world1_);
+            Assert.Equal(world2, world2_);
+            Assert.NotEqual(world1, world2_);
+            Assert.NotEqual(world2, world1_);
+        }
+
+        [Fact]
         public void EmptyWorldDoesNotHaveSpontaneousGeneration()
         {
             World blankWorld = new World(new string[]
@@ -78,6 +99,9 @@ namespace Conway.Test
 
             var nextBlock = block.GetNext();
             var nextBeeHive = beeHive.GetNext();
+
+            Console.WriteLine(block);
+            Console.WriteLine(nextBlock);
 
             // Stable structures should remain
             Assert.Equal(block, nextBlock);
