@@ -112,8 +112,7 @@ namespace Conway
                             .Select(focusedCell => // Then for each focused cell
                                 focusedCell.GetNext( // get the next generation of that cell
                                     LiveNeighborCount(focusedCell.coord) // Based on that cell's current value and its live neighbor count
-                                    )),
-                Age+1);
+                                    )), Age+1); // That is one generation older
 
         // Returns the same world, but shifted by a coordinate delta
         public World GetShifted(Coordinate delta) =>
